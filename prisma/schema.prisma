@@ -1,0 +1,316 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+enum Visibility {
+  PRIVATE
+  FOREST_VISIBLE
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+// ---------------------------------------------------------------
+// CORE ENTITIES
+// ---------------------------------------------------------------
+
+model Forester {
+  id                Int                @id @default(autoincrement())
+  username          String             @unique
+  email             String             @unique
+  passwordHash      String
+  fullName          String?
+  createdAt         DateTime           @default(now())
+
+
+  forestMembers     ForestMember[]
+  leafletAssignees  LeafletAssignee[]
+  sapDrops          SapDrop[]
+  pollenGrains      PollenGrain[]
+  forestEchoes      ForestEcho[]
+  notificationsReceived WhisperingWind[] @relation("RecipientNotifs")
+  notificationsSent     WhisperingWind[] @relation("InitiatorNotifs")
+  foresterRoles     ForesterRole[]
+
+  @@map("Foresters")
+}
+
+model Forest {
+  id            Int             @id @default(autoincrement())
+  name          String
+  description   String?
+  createdAt     DateTime        @default(now())
+
+
+  members       ForestMember[]
+  branches      Branch[]
+foresterRoles ForesterRole[]
+  @@map("Forests")
+}
+
+model ForestMember {
+  foresterId    Int
+  forestId      Int
+  status        InviteStatus     @default(PENDING)
+  invitedAt     DateTime         @default(now())
+  joinedAt      DateTime?
+  acceptedAt    DateTime?
+
+  forester      Forester         @relation(fields: [foresterId], references: [id])
+  forest        Forest           @relation(fields: [forestId], references: [id])
+
+  @@id([foresterId, forestId])
+  @@map("Forest_Members")
+}
+
+// ---------------------------------------------------------------
+// BOARD-LEVEL ENTITIES (Branches)
+// ---------------------------------------------------------------
+
+model Branch {
+  id                  Int           @id @default(autoincrement())
+  title               String
+  visibility          Visibility    @default(FOREST_VISIBLE)
+  backgroundImageUrl  String?
+  createdAt           DateTime      @default(now())
+
+  forestId            Int
+  forest              Forest        @relation(fields: [forestId], references: [id])
+
+  twigs               Twig[]
+  mosses              Moss[]
+  forestEchoes        ForestEcho[]
+
+  @@map("Branches")
+}
+
+model Twig {
+  id         Int        @id @default(autoincrement())
+  title      String
+  position   Int
+  createdAt  DateTime   @default(now())
+
+  branchId   Int
+  branch     Branch     @relation(fields: [branchId], references: [id])
+  leaflets   Leaflet[]
+
+  @@map("Twigs")
+}
+
+// ---------------------------------------------------------------
+// CARD-LEVEL ENTITIES (Leaflets) & FEATURES
+// ---------------------------------------------------------------
+
+model Leaflet {
+  id           Int          @id @default(autoincrement())
+  title        String
+  description  String?
+  dueDate      DateTime?
+  position     Int
+  createdAt    DateTime     @default(now())
+
+  twigId       Int
+  twig         Twig         @relation(fields: [twigId], references: [id])
+
+  assignees    LeafletAssignee[]
+  sapDrops     SapDrop[]
+  pollenGrains PollenGrain[]
+  vines        Vine[]
+  leafletMoss  LeafletMoss[]
+  forestEchoes ForestEcho[]
+  notifications WhisperingWind[]
+
+  @@map("Leaflets")
+}
+
+model LeafletAssignee {
+  leafletId   Int
+  foresterId  Int
+
+  leaflet     Leaflet   @relation(fields: [leafletId], references: [id])
+  forester    Forester  @relation(fields: [foresterId], references: [id])
+
+  @@id([leafletId, foresterId])
+  @@map("Leaflet_Assignees")
+}
+
+model SapDrop {
+  id          Int       @id @default(autoincrement())
+  content     String
+  createdAt   DateTime  @default(now())
+
+  leafletId   Int
+  foresterId  Int
+
+  leaflet     Leaflet   @relation(fields: [leafletId], references: [id])
+  forester    Forester  @relation(fields: [foresterId], references: [id])
+
+  @@map("Sap_Drops")
+}
+
+model PollenGrain {
+  id          Int       @id @default(autoincrement())
+  fileName    String
+  fileUrl     String
+  fileType    String?
+  uploadedAt  DateTime  @default(now())
+
+  leafletId   Int
+  foresterId  Int
+
+  leaflet     Leaflet   @relation(fields: [leafletId], references: [id])
+  forester    Forester  @relation(fields: [foresterId], references: [id])
+
+  @@map("Pollen_Grains")
+}
+
+model Vine {
+  id          Int       @id @default(autoincrement())
+  title       String
+  position    Int
+  createdAt   DateTime  @default(now())
+
+  leafletId   Int
+  leaflet     Leaflet   @relation(fields: [leafletId], references: [id])
+  berries     Berry[]
+
+  @@map("Vines")
+}
+
+model Berry {
+  id          Int       @id @default(autoincrement())
+  content     String
+  isComplete  Boolean   @default(false)
+  position    Int
+
+  vineId      Int
+  vine        Vine      @relation(fields: [vineId], references: [id])
+
+  @@map("Berries")
+}
+
+model Moss {
+  id          Int       @id @default(autoincrement())
+  name        String?
+  colorHex    String
+
+  branchId    Int
+  branch      Branch    @relation(fields: [branchId], references: [id])
+  leafletMoss LeafletMoss[]
+
+  @@map("Mosses")
+}
+
+model LeafletMoss {
+  leafletId   Int
+  mossId      Int
+
+  leaflet     Leaflet   @relation(fields: [leafletId], references: [id])
+  moss        Moss      @relation(fields: [mossId], references: [id])
+
+  @@id([leafletId, mossId])
+  @@map("Leaflet_Mosses")
+}
+
+// ---------------------------------------------------------------
+// META & LOGGING
+// ---------------------------------------------------------------
+
+model ForestEcho {
+  id          Int       @id @default(autoincrement())
+  actionType  String
+  content     String
+  createdAt   DateTime  @default(now())
+
+  foresterId  Int
+  forester    Forester  @relation(fields: [foresterId], references: [id])
+
+  leafletId   Int?
+  branchId    Int?
+
+  leaflet     Leaflet?  @relation(fields: [leafletId], references: [id])
+  branch      Branch?   @relation(fields: [branchId], references: [id])
+
+  @@map("Forest_Echoes")
+}
+
+model WhisperingWind {
+  id            Int       @id @default(autoincrement())
+  actionType    String
+  content       String?
+  isRead        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  recipientId   Int
+  initiatorId   Int
+  leafletId     Int?
+
+  recipient     Forester  @relation("RecipientNotifs", fields: [recipientId], references: [id])
+  initiator     Forester  @relation("InitiatorNotifs", fields: [initiatorId], references: [id])
+  leaflet       Leaflet?  @relation(fields: [leafletId], references: [id])
+
+  @@map("Whispering_Winds")
+}
+
+// ---------------------------------------------------------------
+// ROLE & PERMISSION SYSTEM (Spatie-like)
+// ---------------------------------------------------------------
+
+model Role {
+  id               Int              @id @default(autoincrement())
+  name             String           @unique
+  description      String?
+  createdAt        DateTime         @default(now())
+
+  foresterRoles    ForesterRole[]
+  rolePermissions  RolePermission[]
+}
+
+model Permission {
+  id               Int              @id @default(autoincrement())
+  name             String           @unique
+  description      String?
+  createdAt        DateTime         @default(now())
+
+  rolePermissions  RolePermission[]
+}
+
+model RolePermission {
+  roleId        Int
+  permissionId  Int
+
+  role          Role          @relation(fields: [roleId], references: [id])
+  permission    Permission    @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+}
+
+model ForesterRole {
+  id           Int       @id @default(autoincrement())
+  foresterId   Int
+  roleId       Int
+  forestId     Int?     
+
+  forester     Forester  @relation(fields: [foresterId], references: [id])
+  role         Role      @relation(fields: [roleId], references: [id])
+  forest       Forest?   @relation(fields: [forestId], references: [id])
+
+  @@unique([foresterId, roleId, forestId])
+  @@map("Forester_Roles")
+}
