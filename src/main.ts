@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+
 
   const config = new DocumentBuilder()
     .setTitle('uPot API')
@@ -20,6 +20,8 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
+
+  await app.listen(process.env.PORT ?? 3000);
 }
 
 
