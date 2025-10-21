@@ -47,6 +47,7 @@ model Forester {
   notificationsReceived WhisperingWind[] @relation("RecipientNotifs")
   notificationsSent     WhisperingWind[] @relation("InitiatorNotifs")
   foresterRoles     ForesterRole[]
+  refreshTokens      RefreshToken[]
 
   @@map("Foresters")
 }
@@ -313,4 +314,23 @@ model ForesterRole {
 
   @@unique([foresterId, roleId, forestId])
   @@map("Forester_Roles")
+}
+
+model RefreshToken {
+  id            Int        @id @default(autoincrement())
+  token         String     @unique
+  expiresAt     DateTime
+  revoked       Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  foresterId    Int
+  forester      Forester   @relation(fields: [foresterId], references: [id])
+
+  userAgent     String?    
+  replacedById  Int?       
+  replacedBy    RefreshToken? @relation("TokenReplacements", fields: [replacedById], references: [id])
+  replacements  RefreshToken[] @relation("TokenReplacements")
+
+  @@map("Refresh_Tokens")
 }
