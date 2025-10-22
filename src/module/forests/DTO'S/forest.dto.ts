@@ -9,7 +9,7 @@ export class ForestDTO {
     name: string
 
     @ApiProperty({ required: false })
-    description?: string
+    description?: string | null
 
     @ApiProperty()
     createdAt: Date

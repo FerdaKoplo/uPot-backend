@@ -61,7 +61,7 @@ model Forester {
 
 model Forest {
   id            Int             @id @default(autoincrement())
-  name          String
+  name          String          @unique
   description   String?
   createdAt     DateTime        @default(now())
 
