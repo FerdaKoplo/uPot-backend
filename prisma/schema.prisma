@@ -44,7 +44,8 @@ model Forester {
   birthDate         DateTime?  
   gender            ForesterGender?
   createdAt         DateTime           @default(now())
-
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   forestMembers     ForestMember[]
   leafletAssignees  LeafletAssignee[]
@@ -64,7 +65,8 @@ model Forest {
   name          String          @unique
   description   String?
   createdAt     DateTime        @default(now())
-
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   members       ForestMember[]
   branches      Branch[]
@@ -79,6 +81,8 @@ model ForestMember {
   invitedAt     DateTime         @default(now())
   joinedAt      DateTime?
   acceptedAt    DateTime?
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   forester      Forester         @relation(fields: [foresterId], references: [id])
   forest        Forest           @relation(fields: [forestId], references: [id])
@@ -97,6 +101,8 @@ model Branch {
   visibility          Visibility    @default(FOREST_VISIBLE)
   backgroundImageUrl  String?
   createdAt           DateTime      @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   forestId            Int
   forest              Forest        @relation(fields: [forestId], references: [id])
@@ -113,6 +119,8 @@ model Twig {
   title      String
   position   Int
   createdAt  DateTime   @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   branchId   Int
   branch     Branch     @relation(fields: [branchId], references: [id])
@@ -132,6 +140,8 @@ model Leaflet {
   dueDate      DateTime?
   position     Int
   createdAt    DateTime     @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   twigId       Int
   twig         Twig         @relation(fields: [twigId], references: [id])
@@ -150,6 +160,9 @@ model Leaflet {
 model LeafletAssignee {
   leafletId   Int
   foresterId  Int
+  createdAt   DateTime  @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   leaflet     Leaflet   @relation(fields: [leafletId], references: [id])
   forester    Forester  @relation(fields: [foresterId], references: [id])
@@ -162,6 +175,8 @@ model SapDrop {
   id          Int       @id @default(autoincrement())
   content     String
   createdAt   DateTime  @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   leafletId   Int
   foresterId  Int
@@ -178,6 +193,8 @@ model PollenGrain {
   fileUrl     String
   fileType    String?
   uploadedAt  DateTime  @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   leafletId   Int
   foresterId  Int
@@ -192,7 +209,9 @@ model Vine {
   id          Int       @id @default(autoincrement())
   title       String
   position    Int
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   leafletId   Int
   leaflet     Leaflet   @relation(fields: [leafletId], references: [id])
@@ -206,6 +225,9 @@ model Berry {
   content     String
   isComplete  Boolean   @default(false)
   position    Int
+  createdAt   DateTime  @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   vineId      Int
   vine        Vine      @relation(fields: [vineId], references: [id])
@@ -217,6 +239,9 @@ model Moss {
   id          Int       @id @default(autoincrement())
   name        String?
   colorHex    String
+  createdAt   DateTime @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   branchId    Int
   branch      Branch    @relation(fields: [branchId], references: [id])
@@ -228,6 +253,9 @@ model Moss {
 model LeafletMoss {
   leafletId   Int
   mossId      Int
+  createdAt   DateTime @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   leaflet     Leaflet   @relation(fields: [leafletId], references: [id])
   moss        Moss      @relation(fields: [mossId], references: [id])
@@ -245,6 +273,8 @@ model ForestEcho {
   actionType  String
   content     String
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime?
+  deletedAt   DateTime? 
 
   foresterId  Int
   forester    Forester  @relation(fields: [foresterId], references: [id])
@@ -264,6 +294,8 @@ model WhisperingWind {
   content       String?
   isRead        Boolean   @default(false)
   createdAt     DateTime  @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   recipientId   Int
   initiatorId   Int
@@ -285,6 +317,8 @@ model Role {
   name             String           @unique
   description      String?
   createdAt        DateTime         @default(now())
+  updatedAt        DateTime?
+  deletedAt        DateTime? 
 
   foresterRoles    ForesterRole[]
   rolePermissions  RolePermission[]
@@ -295,6 +329,8 @@ model Permission {
   name             String           @unique
   description      String?
   createdAt        DateTime         @default(now())
+  updatedAt        DateTime?
+  deletedAt        DateTime?
 
   rolePermissions  RolePermission[]
 }
@@ -302,6 +338,9 @@ model Permission {
 model RolePermission {
   roleId        Int
   permissionId  Int
+  createdAt   DateTime @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   role          Role          @relation(fields: [roleId], references: [id])
   permission    Permission    @relation(fields: [permissionId], references: [id])
@@ -314,6 +353,9 @@ model ForesterRole {
   foresterId   Int
   roleId       Int
   forestId     Int?     
+  createdAt   DateTime @default(now())
+  updatedAt     DateTime?
+  deletedAt     DateTime? 
 
   forester     Forester  @relation(fields: [foresterId], references: [id])
   role         Role      @relation(fields: [roleId], references: [id])

@@ -71,9 +71,10 @@ export class ForestService {
         if (dto.name && dto.name !== existForest.name) {
             const duplicate = await this.prisma.forest.findFirst({
                 where: { name: dto.name },
-            });
+            })
 
-            if (duplicate) throw new BadRequestException("Forest name already exists");
+            if (duplicate)
+                throw new BadRequestException("Forest name already exists");
         }
 
         const updatedForest = await this.prisma.forest.update({
@@ -84,17 +85,43 @@ export class ForestService {
                 name: dto.name ?? existForest.name,
                 description: dto.description ?? existForest.description,
             },
-            include : {
-                members : true
-            }  
+            include: {
+                members: true
+            }
         })
 
-         return {
+        return {
             id: updatedForest.id,
             name: updatedForest.name,
             description: updatedForest.description ?? undefined,
             createdAt: updatedForest.createdAt,
             memberIds: updatedForest.members.map(m => m.foresterId),
+        }
+    }
+
+    async deleteForest(forestId: number): Promise<ForestDTO> {
+        const existingForest = await this.prisma.forest.findUnique({
+            where: {
+                id: forestId,
+                deletedAt: null
+            }
+        })
+
+        if (!existingForest)
+            throw new BadRequestException("forest doesnt exist")
+
+        const deletedForest = await this.prisma.forest.update({
+            where: { id: forestId },
+            data: { deletedAt: new Date() },
+            include: { members: true },
+        })
+
+        return {
+            id: deletedForest.id,
+            name: deletedForest.name,
+            description: deletedForest.description ?? undefined,
+            createdAt: deletedForest.createdAt,
+            memberIds: deletedForest.members.map(m => m.foresterId),
         }
     }
 }
