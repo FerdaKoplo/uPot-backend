@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/utils/prisma.service";
 import { ForestDTO } from "./DTO'S/forest.dto";
 import { FilterForestDTO } from "./DTO'S/filter-forest.dto";
@@ -31,6 +31,36 @@ export class ForestService {
             memberIds: forest.members.map(m => m.foresterId),
         }))
     }
+
+    async getForestDetail(forestId: number, foresterId: number): Promise<ForestDTO> {
+        const forest = await this.prisma.forest.findFirst({
+            where: {
+                id: forestId,
+                members: {
+                    some: { foresterId },
+                },
+                deletedAt: null,
+            },
+            include: {
+                members: {
+                    include: { forester: true },
+                },
+                branches: true,
+            },
+        })
+
+        if (!forest)
+            throw new NotFoundException('Forest not found or you have no access');
+
+        return {
+            id: forest.id,
+            name: forest.name,
+            description: forest.description ?? undefined,
+            createdAt: forest.createdAt,
+            memberIds: forest.members.map(m => m.foresterId),
+        }
+    }
+
 
     async createForest(dto: CreateForestDTO): Promise<ForestDTO> {
         const existForestName = await this.prisma.forest.findUnique({
