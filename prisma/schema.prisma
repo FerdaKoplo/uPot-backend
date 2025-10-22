@@ -26,6 +26,10 @@ enum InviteStatus {
   REJECTED
 }
 
+enum ForesterGender {
+  MALE
+  FEMALE
+}
 // ---------------------------------------------------------------
 // CORE ENTITIES
 // ---------------------------------------------------------------
@@ -36,6 +40,9 @@ model Forester {
   email             String             @unique
   passwordHash      String
   fullName          String?
+  avatar            String?
+  birthDate         DateTime?  
+  gender            ForesterGender?
   createdAt         DateTime           @default(now())
 
 
@@ -61,7 +68,7 @@ model Forest {
 
   members       ForestMember[]
   branches      Branch[]
-foresterRoles ForesterRole[]
+  foresterRoles ForesterRole[]
   @@map("Forests")
 }
 

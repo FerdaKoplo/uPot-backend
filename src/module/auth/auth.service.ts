@@ -88,5 +88,4 @@ export class AuthService {
             data: { revoked: true }
         })
     }
-
 }
