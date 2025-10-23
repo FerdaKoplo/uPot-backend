@@ -12,20 +12,30 @@ export class ForestService {
     async getUserForests(foresterId: number, filter?: FilterForestDTO): Promise<ForestDTO[]> {
         const forests = await this.prisma.forest.findMany({
             where: {
-                members: {
-                    some: {
-                        foresterId
-                    }
-                }
+                OR: [
+                    {
+                        ownerId : foresterId
+                    },
+                    {
+                        members: {
+                            some: {
+                                foresterId
+                            }
+                        }
+                    },
+
+                ]
+
             },
-            include: { members: true },
+            include: { members: true, owner : true },
             skip: ((filter?.page ?? 1) - 1) * (filter?.limit ?? 10),
             take: filter?.limit ?? 10,
         })
 
         return forests.map(forest => ({
-            id: forest.id,
+            id: forest.id, 
             name: forest.name,
+            ownerId : forest.owner.id,
             description: forest.description,
             createdAt: forest.createdAt,
             memberIds: forest.members.map(m => m.foresterId),
@@ -73,7 +83,6 @@ export class ForestService {
             },
         })
 
-        console.log('Member:', member)
 
         if (!member)
             throw new ForbiddenException("You are not a member of this forest");
@@ -95,10 +104,12 @@ export class ForestService {
     }
 
 
-    async createForest(dto: CreateForestDTO): Promise<ForestDTO> {
+    async createForest(dto: CreateForestDTO, foresterId : number): Promise<ForestDTO> {
         const existForestName = await this.prisma.forest.findUnique({
             where: {
-                name: dto.name
+                name: dto.name,
+                description : dto.description,
+                ownerId : foresterId
             }
         })
 
@@ -117,16 +128,21 @@ export class ForestService {
             name: newForest.name,
             description: newForest.description ?? undefined,
             createdAt: newForest.createdAt,
-            memberIds: [],
         }
     }
 
-    async updateForest(forestId: number, dto: UpdateForestDTO): Promise<ForestDTO> {
+    async updateForest(forestId: number, dto: UpdateForestDTO, foresterId : number): Promise<ForestDTO> {
         const existForest = await this.prisma.forest.findUnique({
             where: {
                 id: forestId
+            },
+            include : {
+                owner : true
             }
         })
+
+        if (existForest?.ownerId !== foresterId) 
+            throw new ForbiddenException("Only the owner can update this forest")
 
         if (!existForest)
             throw new BadRequestException("forest doesnt exist")
@@ -148,9 +164,6 @@ export class ForestService {
                 name: dto.name ?? existForest.name,
                 description: dto.description ?? existForest.description,
             },
-            include: {
-                members: true
-            }
         })
 
         return {
@@ -158,11 +171,10 @@ export class ForestService {
             name: updatedForest.name,
             description: updatedForest.description ?? undefined,
             createdAt: updatedForest.createdAt,
-            memberIds: updatedForest.members.map(m => m.foresterId),
         }
     }
 
-    async deleteForest(forestId: number): Promise<ForestDTO> {
+    async deleteForest(forestId: number, foresterId : number): Promise<ForestDTO> {
         const existingForest = await this.prisma.forest.findUnique({
             where: {
                 id: forestId,
@@ -173,10 +185,12 @@ export class ForestService {
         if (!existingForest)
             throw new BadRequestException("forest doesnt exist")
 
+         if (existingForest.ownerId !== foresterId) 
+            throw new ForbiddenException("Only the owner can delete this forest")
+
         const deletedForest = await this.prisma.forest.update({
             where: { id: forestId },
             data: { deletedAt: new Date() },
-            include: { members: true },
         })
 
         return {
@@ -184,7 +198,6 @@ export class ForestService {
             name: deletedForest.name,
             description: deletedForest.description ?? undefined,
             createdAt: deletedForest.createdAt,
-            memberIds: deletedForest.members.map(m => m.foresterId),
         }
     }
 }

@@ -25,18 +25,19 @@ export class ForestController {
     }
 
     @Post()
-    async createForest(@Body() dto: CreateForestDTO) {
-        return this.forestService.createForest(dto)
+    async createForest(@GetCurrentUser('sub') foresterId: number, @Body() dto: CreateForestDTO) {
+        return this.forestService.createForest(dto, foresterId)
     }
 
     @Patch(':id')
-    async updateForest(@Param('id') id: string, @Body() dto: UpdateForestDTO) {
-        return this.forestService.updateForest(Number(id), dto)
+    async updateForest(@GetCurrentUser('sub') foresterId: number, @Param('id', ParseIntPipe) id: number,
+        @Body() dto: UpdateForestDTO) {
+        return this.forestService.updateForest(id, dto, foresterId)
     }
 
     @Delete(':id')
-    async deleteForest(@Param('id') id: string) {
-        return this.forestService.deleteForest(Number(id))
+    async deleteForest(@GetCurrentUser('sub') foresterId: number, @Param('id', ParseIntPipe) id: number) {
+        return this.forestService.deleteForest(id, foresterId)
     }
 
 }
