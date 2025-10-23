@@ -47,6 +47,7 @@ model Forester {
   updatedAt     DateTime?
   deletedAt     DateTime? 
 
+  owner             Forest[]
   forestMembers     ForestMember[]
   leafletAssignees  LeafletAssignee[]
   sapDrops          SapDrop[]
@@ -67,6 +68,9 @@ model Forest {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime?
   deletedAt     DateTime? 
+
+  ownerId       Int @default(1)
+  owner         Forester  @relation(fields: [ownerId], references: [id])
 
   members       ForestMember[]
   branches      Branch[]

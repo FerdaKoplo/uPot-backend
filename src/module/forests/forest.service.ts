@@ -34,18 +34,28 @@ export class ForestService {
 
     async getForestDetail(forestId: number, foresterId: number): Promise<ForestDTO> {
 
-
         const forest = await this.prisma.forest.findFirst({
             where: {
                 id: forestId,
                 deletedAt: null,
             },
             include: {
+                owner: true,
                 branches: true,
             },
         })
 
-        if (!forest) throw new NotFoundException("Forest not found");
+        if (!forest) throw new NotFoundException("Forest not found")
+
+        if (forest.ownerId === foresterId) {
+            return {
+                id: forest.id,
+                name: forest.name,
+                description: forest.description ?? undefined,
+                createdAt: forest.createdAt,
+            }
+        }
+
 
         const member = await this.prisma.forestMember.findFirst({
             where: {
@@ -62,6 +72,8 @@ export class ForestService {
                 },
             },
         })
+
+        console.log('Member:', member)
 
         if (!member)
             throw new ForbiddenException("You are not a member of this forest");
