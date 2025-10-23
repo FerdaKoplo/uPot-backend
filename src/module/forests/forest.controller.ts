@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ForestService } from "./forest.service";
 import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
 import { FilterForestDTO } from "./DTO'S/filter-forest.dto";
 import { CreateForestDTO } from "./DTO'S/create-forest.dto";
 import { UpdateForestDTO } from "./DTO'S/update-forest.dto";
+import { GetCurrentUser } from "src/common/decorator/current-user.decorator";
 
 @ApiTags('Forest')
 @ApiBearerAuth()
@@ -14,15 +15,13 @@ export class ForestController {
     constructor(private readonly forestService: ForestService) { }
 
     @Get()
-    async getUserForests(@Req() req, @Query() filter: FilterForestDTO) {
-        const foresterId = req.user.sub
+    async getUserForests(@GetCurrentUser('sub') foresterId: number, @Query() filter: FilterForestDTO) {
         return this.forestService.getUserForests(foresterId, filter)
     }
 
     @Get(':id')
-    async getForestDetail(@Req() req, @Param('id') id: string) {
-        const foresterId = req.user.sub
-        return this.forestService.getForestDetail(Number(id), foresterId)
+    async getForestDetail(@GetCurrentUser('sub') foresterId: number, @Param('id', ParseIntPipe) id: number) {
+        return this.forestService.getForestDetail(id, foresterId)
     }
 
     @Post()

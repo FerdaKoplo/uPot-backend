@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/utils/prisma.service";
 import { ForestDTO } from "./DTO'S/forest.dto";
 import { FilterForestDTO } from "./DTO'S/filter-forest.dto";
@@ -33,32 +33,53 @@ export class ForestService {
     }
 
     async getForestDetail(forestId: number, foresterId: number): Promise<ForestDTO> {
+
+
         const forest = await this.prisma.forest.findFirst({
             where: {
                 id: forestId,
-                members: {
-                    some: { foresterId },
-                },
                 deletedAt: null,
             },
             include: {
-                members: {
-                    include: { forester: true },
-                },
                 branches: true,
             },
         })
 
-        if (!forest)
-            throw new NotFoundException('Forest not found or you have no access');
+        if (!forest) throw new NotFoundException("Forest not found");
+
+        const member = await this.prisma.forestMember.findFirst({
+            where: {
+                forestId,
+                foresterId,
+            },
+            include: {
+                role: {
+                    include: {
+                        rolePermissions: {
+                            include: { permission: true },
+                        },
+                    },
+                },
+            },
+        })
+
+        if (!member)
+            throw new ForbiddenException("You are not a member of this forest");
+
+        const canView = member.role.rolePermissions.some(
+            (rp) => rp.permission.name === "view_forest"
+        )
+
+        if (!canView)
+            throw new ForbiddenException("You do not have permission to view this forest");
 
         return {
             id: forest.id,
             name: forest.name,
             description: forest.description ?? undefined,
             createdAt: forest.createdAt,
-            memberIds: forest.members.map(m => m.foresterId),
         }
+
     }
 
 

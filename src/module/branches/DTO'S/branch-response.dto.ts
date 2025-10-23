@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Visibility } from "generated/prisma";
+import { ForestEcho, Moss, Twig, Visibility } from "generated/prisma";
 
 export class BranchResponseDTO {
     @ApiProperty()
@@ -12,15 +12,30 @@ export class BranchResponseDTO {
     visibility: Visibility
 
     @ApiProperty({ required: false })
-    backgroundImageUrl?: string
+    backgroundImageUrl?: string | null
 
     @ApiProperty()
-    createdAt : Date
+    forestId: number
 
     @ApiProperty()
-    updatedAt : Date
+    createdAt?: Date | null
 
     @ApiProperty()
-    deletedAt : Date
+    updatedAt?: Date | null 
+
+    @ApiProperty()
+    deletedAt?: Date
+
+    @ApiProperty({ type: [Number], required: false, description: "IDs of foresters (members) in the forest" })
+    memberIds?: number[]
+
+    @ApiProperty({ type: Array, required: false, description: "List of twigs under this branch" })
+    twigs?: Twig[] 
+
+    @ApiProperty({ type: Array, required: false, description: "List of mosses under this branch" })
+    mosses?: Moss[]
+
+    @ApiProperty({ type: Array, required: false, description: "List of forest echoes related to this branch" })
+    forestEchoes?: ForestEcho[]
 
 }

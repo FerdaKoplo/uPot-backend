@@ -76,7 +76,7 @@ export class AuthService {
         })
         if (!forester) throw new ForbiddenException('Invalid credentials')
 
-        const pwMatches = await compareHash(dto.password, dto.password)
+        const pwMatches = await compareHash(dto.password, forester.passwordHash)
         if (!pwMatches) throw new ForbiddenException('Invalid credentials')
 
         return this.issueTokens(forester.id, forester.email)

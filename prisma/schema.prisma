@@ -77,6 +77,7 @@ model Forest {
 model ForestMember {
   foresterId    Int
   forestId      Int
+  roleId        Int  
   status        InviteStatus     @default(PENDING)
   invitedAt     DateTime         @default(now())
   joinedAt      DateTime?
@@ -86,6 +87,7 @@ model ForestMember {
 
   forester      Forester         @relation(fields: [foresterId], references: [id])
   forest        Forest           @relation(fields: [forestId], references: [id])
+  role          Role             @relation(fields: [roleId], references: [id])
 
   @@id([foresterId, forestId])
   @@map("Forest_Members")
@@ -321,6 +323,7 @@ model Role {
   deletedAt        DateTime? 
 
   foresterRoles    ForesterRole[]
+  member           ForestMember[]
   rolePermissions  RolePermission[]
 }
 
