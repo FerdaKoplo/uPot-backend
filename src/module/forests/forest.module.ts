@@ -5,8 +5,8 @@ import { PrismaService } from "src/utils/prisma.service";
 
 @Module({
     imports : [PrismaService],
+    controllers : [ForestController],
     providers : [ForestService],
-    exports : [ForestService]
 })
 
 export class ForestModule {}

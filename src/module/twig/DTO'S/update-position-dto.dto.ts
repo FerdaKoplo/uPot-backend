@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsString } from "class-validator"
+import { IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator"
 
-export class UpdatePositionDTO {
+export class UpdateTwigDTO {
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     title: string
 
-    @IsString()
-    @IsNotEmpty()
-    position: string
+    @IsInt()
+    @IsOptional()
+    position: number
 }

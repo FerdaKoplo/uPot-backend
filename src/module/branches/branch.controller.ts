@@ -31,13 +31,13 @@ export class BranchController {
         FileInterceptor('backgroundImage', {
             storage: diskStorage({
                 destination: './storages/avatars',
-                filename: (req, file, callback) => {
+                filename: (_, file, callback) => {
                     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
                     const ext = extname(file.originalname);
                     callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
                 },
             }),
-            fileFilter: (req, file, cb) => {
+            fileFilter: (_, file, cb) => {
                 if (!file.mimetype.match(/^image\/(png|jpg|jpeg|webp)$/))
                     return cb(new BadRequestException("Only image files are allowed!"), false);
                 cb(null, true);

@@ -7,7 +7,7 @@ export class CreateTwigDTO {
 
     @IsInt()
     @IsNotEmpty()
-    position: string
+    position: number
 
     @IsInt()
     branchId: number

@@ -122,7 +122,7 @@ model Branch {
 
 model Twig {
   id         Int        @id @default(autoincrement())
-  title      String
+  title      String     @unique
   position   Int
   createdAt  DateTime   @default(now())
   updatedAt     DateTime?

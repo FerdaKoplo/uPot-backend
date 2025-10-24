@@ -6,7 +6,7 @@ import { PrismaService } from "src/utils/prisma.service";
 @Module({
     imports : [PrismaService],
     controllers : [BranchController],
-    providers : [BranchService]
+    providers : [BranchService],
 })
 
 export class BranchModule { }
