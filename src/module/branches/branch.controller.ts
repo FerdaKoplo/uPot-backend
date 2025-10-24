@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
 import { BranchService } from "./branch.service";
@@ -15,10 +15,14 @@ export class BranchController {
 
     constructor(private readonly branchService: BranchService) { }
 
-    @Get(':forestId')
-    async getBranchesByForest(@Param('forestId') forestId: string) {
-        const id = parseInt(forestId)
-        return this.branchService.getBranchByForest(id)
+    @Get('forest/:forestId')
+    async getBranchesByForest(@Param('forestId', ParseIntPipe) forestId: number) {
+        return this.branchService.getBranchByForest(forestId)
+    }
+
+    @Get('forest/:forestId/:branchId')
+    async getDetailBranch(@Param('forestId', ParseIntPipe) forestId : number, @Param('branchId', ParseIntPipe) branchId : number) {
+        return this.branchService.getDetailBranch(forestId, branchId)
     }
 
     @Post(':branchId/background')
@@ -42,12 +46,13 @@ export class BranchController {
     )
 
     async uploadBackgroundImage(
-        @Param('branchId') branchId: number,
+        @Param('branchId', ParseIntPipe) branchId: number,
         @UploadedFile() file: Express.Multer.File,
     ) {
         const imageUrl = `/storages/avatars/${file.filename}`;
         return this.branchService.addBackgroundImage(branchId, { backgroundImageUrl: imageUrl });
     }
+
 
     @Post()
     @UseGuards(JwtAuthGuard)
@@ -58,22 +63,22 @@ export class BranchController {
     @Put(':branchId')
     @UseGuards(JwtAuthGuard)
     async updateBranch(
-        @Param('branchId') branchId: string,
+        @Param('branchId', ParseIntPipe) branchId: number,
         @Body() dto: UpdateBranchDTO
     ) {
-        return this.branchService.updateBranch(Number(branchId), dto)
+        return this.branchService.updateBranch(branchId, dto)
     }
 
     @Delete(':branchId')
     @UseGuards(JwtAuthGuard)
-    async deleteBranch(@Param('branchId') branchId: string) {
-        return this.branchService.deleteBranch(Number(branchId))
+    async deleteBranch(@Param('branchId', ParseIntPipe) branchId: number) {
+        return this.branchService.deleteBranch(branchId)
     }
 
     @Delete(':branchId/background')
     @UseGuards(JwtAuthGuard)
-    async deleteBackgroundImage(@Param('branchId') branchId: string) {
-        return this.branchService.deleteBackgroundImage(Number(branchId))
+    async deleteBackgroundImage(@Param('branchId', ParseIntPipe) branchId: number) {
+        return this.branchService.deleteBackgroundImage(branchId)
     }
 
 }

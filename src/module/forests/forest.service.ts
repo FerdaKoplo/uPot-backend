@@ -14,7 +14,7 @@ export class ForestService {
             where: {
                 OR: [
                     {
-                        ownerId : foresterId
+                        ownerId: foresterId
                     },
                     {
                         members: {
@@ -27,15 +27,15 @@ export class ForestService {
                 ]
 
             },
-            include: { members: true, owner : true },
+            include: { members: true, owner: true },
             skip: ((filter?.page ?? 1) - 1) * (filter?.limit ?? 10),
             take: filter?.limit ?? 10,
         })
 
         return forests.map(forest => ({
-            id: forest.id, 
+            id: forest.id,
             name: forest.name,
-            ownerId : forest.owner.id,
+            ownerId: forest.owner.id,
             description: forest.description,
             createdAt: forest.createdAt,
             memberIds: forest.members.map(m => m.foresterId),
@@ -55,7 +55,8 @@ export class ForestService {
             },
         })
 
-        if (!forest) throw new NotFoundException("Forest not found")
+        if (!forest)
+             throw new NotFoundException("Forest not found")
 
         if (forest.ownerId === foresterId) {
             return {
@@ -65,7 +66,6 @@ export class ForestService {
                 createdAt: forest.createdAt,
             }
         }
-
 
         const member = await this.prisma.forestMember.findFirst({
             where: {
@@ -87,12 +87,12 @@ export class ForestService {
         if (!member)
             throw new ForbiddenException("You are not a member of this forest");
 
-        const canView = member.role.rolePermissions.some(
-            (rp) => rp.permission.name === "view_forest"
-        )
+        // const canView = member.role.rolePermissions.some(
+        //     (rp) => rp.permission.name === "view_forest"
+        // )
 
-        if (!canView)
-            throw new ForbiddenException("You do not have permission to view this forest");
+        // if (!canView)
+        //     throw new ForbiddenException("You do not have permission to view this forest");
 
         return {
             id: forest.id,
@@ -104,12 +104,12 @@ export class ForestService {
     }
 
 
-    async createForest(dto: CreateForestDTO, foresterId : number): Promise<ForestDTO> {
+    async createForest(dto: CreateForestDTO, foresterId: number): Promise<ForestDTO> {
         const existForestName = await this.prisma.forest.findUnique({
             where: {
                 name: dto.name,
-                description : dto.description,
-                ownerId : foresterId
+                description: dto.description,
+                ownerId: foresterId
             }
         })
 
@@ -131,17 +131,17 @@ export class ForestService {
         }
     }
 
-    async updateForest(forestId: number, dto: UpdateForestDTO, foresterId : number): Promise<ForestDTO> {
+    async updateForest(forestId: number, dto: UpdateForestDTO, foresterId: number): Promise<ForestDTO> {
         const existForest = await this.prisma.forest.findUnique({
             where: {
                 id: forestId
             },
-            include : {
-                owner : true
+            include: {
+                owner: true
             }
         })
 
-        if (existForest?.ownerId !== foresterId) 
+        if (existForest?.ownerId !== foresterId)
             throw new ForbiddenException("Only the owner can update this forest")
 
         if (!existForest)
@@ -174,7 +174,7 @@ export class ForestService {
         }
     }
 
-    async deleteForest(forestId: number, foresterId : number): Promise<ForestDTO> {
+    async deleteForest(forestId: number, foresterId: number): Promise<ForestDTO> {
         const existingForest = await this.prisma.forest.findUnique({
             where: {
                 id: forestId,
@@ -185,12 +185,16 @@ export class ForestService {
         if (!existingForest)
             throw new BadRequestException("forest doesnt exist")
 
-         if (existingForest.ownerId !== foresterId) 
+        if (existingForest.ownerId !== foresterId)
             throw new ForbiddenException("Only the owner can delete this forest")
 
         const deletedForest = await this.prisma.forest.update({
-            where: { id: forestId },
-            data: { deletedAt: new Date() },
+            where: {
+                id: forestId
+            },
+            data: {
+                deletedAt: new Date()
+            },
         })
 
         return {

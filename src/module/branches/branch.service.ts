@@ -1,6 +1,6 @@
 import { PrismaService } from "src/utils/prisma.service";
 import { BranchResponseDTO } from "./DTO'S/branch-response.dto";
-import { NotFoundException } from "@nestjs/common";
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { CreateBranchDTO } from "./DTO'S/create-branch.dto";
 import { AddBackgroundImageDTO } from "./DTO'S/add-background-image.dto";
 import { BackgroundUpdateResponseDTO } from "./DTO'S/background-update-response.dto";
@@ -44,6 +44,25 @@ export class BranchService {
 
         if (!branch)
             throw new NotFoundException("branch not found")
+
+        // const member = await this.prisma.forestMember.findFirst({
+        //     where: {
+        //         forestId,
+        //         foresterId,
+        //     },
+        //     include: {
+        //         role: {
+        //             include: {
+        //                 rolePermissions: {
+        //                     include: { permission: true },
+        //                 },
+        //             },
+        //         },
+        //     },
+        // })
+
+        // if (!member)
+        //     throw new ForbiddenException("You are not a member of this forest"); 
 
         return {
             id: branch.id,
@@ -133,7 +152,7 @@ export class BranchService {
         }
     }
 
-    async deleteBranch(branchId: number) : Promise<BranchResponseDTO> {
+    async deleteBranch(branchId: number): Promise<BranchResponseDTO> {
 
         const existingBranch = await this.prisma.branch.findUnique({
             where: {
