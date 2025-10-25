@@ -218,7 +218,7 @@ model Vine {
   createdAt   DateTime
   updatedAt     DateTime?
   deletedAt     DateTime? 
-
+  
   leafletId   Int
   leaflet     Leaflet   @relation(fields: [leafletId], references: [id])
   berries     Berry[]

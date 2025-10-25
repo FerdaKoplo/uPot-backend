@@ -4,8 +4,7 @@ import { ForesterController } from "./forester.controller";
 import { PrismaService } from "src/utils/prisma.service";
 
 @Module({
-    imports : [PrismaService],
-    providers : [ForesterService],
+    providers : [ForesterService, PrismaService],
     exports : [ForesterService]
 })
 

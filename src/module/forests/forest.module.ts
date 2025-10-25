@@ -4,9 +4,8 @@ import { ForestService } from "./forest.service";
 import { PrismaService } from "src/utils/prisma.service";
 
 @Module({
-    imports : [PrismaService],
     controllers : [ForestController],
-    providers : [ForestService],
+    providers : [ForestService, PrismaService],
 })
 
 export class ForestModule {}

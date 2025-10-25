@@ -4,10 +4,8 @@ import { TwigService } from "./twig.service";
 import { TwigController } from "./twig.controller";
 
 @Module({
-    imports: [PrismaService],
-    providers : [TwigService],
+    providers : [TwigService, PrismaService],
     controllers : [TwigController],
-    exports : [TwigController, TwigService]
 })
 
-export class TwigModule { }
+export class TwigModule {}

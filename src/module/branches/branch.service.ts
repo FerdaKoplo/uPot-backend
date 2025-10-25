@@ -1,6 +1,6 @@
 import { PrismaService } from "src/utils/prisma.service";
 import { BranchResponseDTO } from "./DTO'S/branch-response.dto";
-import { ForbiddenException, NotFoundException } from "@nestjs/common";
+import { NotFoundException } from "@nestjs/common";
 import { CreateBranchDTO } from "./DTO'S/create-branch.dto";
 import { AddBackgroundImageDTO } from "./DTO'S/add-background-image.dto";
 import { BackgroundUpdateResponseDTO } from "./DTO'S/background-update-response.dto";
