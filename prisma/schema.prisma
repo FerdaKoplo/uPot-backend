@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// This is your Prisma schema file, // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
@@ -30,6 +29,11 @@ enum ForesterGender {
   MALE
   FEMALE
 }
+
+// enum fileType {
+//   VIDEO
+//   IMG
+// }
 // ---------------------------------------------------------------
 // CORE ENTITIES
 // ---------------------------------------------------------------
@@ -218,7 +222,7 @@ model Vine {
   createdAt   DateTime
   updatedAt     DateTime?
   deletedAt     DateTime? 
-  
+
   leafletId   Int
   leaflet     Leaflet   @relation(fields: [leafletId], references: [id])
   berries     Berry[]
