@@ -26,6 +26,6 @@ export class PollenGrainResponseDTO {
     updatedAt?: Date | null
 
     @ApiProperty()
-    deletedAt?: Date
+    deletedAt?: Date | null
 
 }
